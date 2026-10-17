@@ -1,0 +1,440 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0c0d14">
+  <meta name="description" content="Her gün serini devam ettir ve alevinin dönüşümünü izle.">
+  <meta name="color-scheme" content="dark">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="preload" as="image" href="./flame-blue.webp" type="image/webp"><link rel="preload" as="image" href="./burst-blue-a.webp" type="image/webp">
+  <title>Alev Serisi · Ultimate v19</title>
+  <style>
+    @property --flame { syntax: "<color>"; inherits: true; initial-value: #258fff; }
+    @property --flame-mid { syntax: "<color>"; inherits: true; initial-value: #9beaff; }
+    @property --ambient { syntax: "<color>"; inherits: true; initial-value: #168dff; }
+    :root {
+      color-scheme: dark;
+      --bg:#0c0d14; --panel:#191923; --line:#2b2c3a; --text:#f5f4fa; --muted:#918fa3;
+      --flame:#258fff; --flame-mid:#9beaff; --flame-core:#fff; --ambient:#168dff;
+      --fire-scale:.43; --ambient-opacity:.26; --stage-glow:.32; --halo-opacity:.18;
+      transition:--flame 1s ease, --flame-mid 1s ease, --ambient 1s ease;
+    }
+    * { box-sizing:border-box; }
+    html { min-height:100%; background:var(--bg); }
+    body { margin:0; min-height:100vh; min-height:100dvh; color:var(--text); background:#0c0d14; position:relative; isolation:isolate; overflow-x:hidden; font-family:ui-rounded,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; -webkit-font-smoothing:antialiased; }
+    button { -webkit-tap-highlight-color:transparent; }
+
+    /* Lightweight screen-wide colour atmosphere: full viewport, gradients only, no blur filter/canvas. */
+    .screen-ambience { position:fixed; inset:0; z-index:0; overflow:hidden; pointer-events:none; opacity:var(--ambient-opacity); transition:opacity .42s ease; background:radial-gradient(ellipse at 50% 36%,color-mix(in srgb,var(--ambient) 28%,transparent),transparent 67%),radial-gradient(ellipse at 50% 73%,color-mix(in srgb,var(--flame) 13%,transparent),transparent 60%); }
+    .screen-ambience::before { content:""; position:absolute; inset:0; pointer-events:none; background:radial-gradient(ellipse at 50% 42%,color-mix(in srgb,var(--ambient) 43%,transparent),transparent 66%); opacity:.72; }
+    .screen-ambience::after { content:""; position:absolute; inset:0; pointer-events:none; background:radial-gradient(ellipse at 50% 39%,color-mix(in srgb,var(--flame-mid) 36%,transparent),transparent 55%),linear-gradient(180deg,color-mix(in srgb,var(--ambient) 12%,transparent),transparent 42%,color-mix(in srgb,var(--ambient) 14%,transparent)); opacity:.26; }
+    body.igniting .screen-ambience, body.major-celebration .screen-ambience { opacity:1 !important; }
+    body.igniting .screen-ambience::after { animation:ambient-flash .95s ease-out both; }
+    body.major-celebration .screen-ambience::after { animation:ambient-flash-major 1.6s ease-out both; }
+    @keyframes ambient-flash { 0%{opacity:.22} 14%{opacity:.95} 42%{opacity:.58} 100%{opacity:.22} }
+    @keyframes ambient-flash-major { 0%{opacity:.22} 10%{opacity:1} 29%{opacity:.85} 58%{opacity:.50} 100%{opacity:.22} }
+    body.motion-paused .screen-ambience::after { animation-play-state:paused !important; }
+    .app { position:relative; z-index:1; width:min(100%,520px); min-height:100vh; min-height:100dvh; margin:0 auto; padding:calc(19px + env(safe-area-inset-top)) 22px calc(26px + env(safe-area-inset-bottom)); display:flex; flex-direction:column; }
+    .app[hidden] { display:none !important; }
+    header { display:flex; align-items:center; justify-content:center; min-height:38px; margin-bottom:8px; position:relative; }
+    .brand { font-size:13px; font-weight:850; letter-spacing:.2em; color:#b7b4c8; text-transform:uppercase; }
+    .sound-toggle { position:absolute; right:0; top:50%; transform:translateY(-50%); display:grid; place-items:center; width:40px; height:40px; border:1px solid #343748; border-radius:14px; color:var(--flame-mid); background:rgba(16,18,29,.64); cursor:pointer; transition:border-color .4s,box-shadow .4s,color .5s; }
+    .sound-toggle svg { width:20px;height:20px;display:block; }
+    .sound-toggle[aria-pressed="true"] { border-color:color-mix(in srgb,var(--flame) 48%,#343748); box-shadow:0 0 20px color-mix(in srgb,var(--ambient) 16%,transparent); }
+    .sound-toggle:focus-visible,.main-button:focus-visible,.month-toggle:focus-visible { outline:2px solid var(--flame-mid); outline-offset:3px; }
+    .hero { display:flex; flex-direction:column; align-items:center; text-align:center; padding-top:6px; }
+    .flame-stage { width:100%; height:clamp(232px,36vh,310px); position:relative; isolation:isolate; display:grid; place-items:center; margin:0; overflow:visible; background:transparent; --stage-boost:0; }
+    .flame-stage::before { content:""; position:absolute; z-index:0; pointer-events:none; width:83%; height:57%; left:8.5%; bottom:3%; border-radius:50%; background:radial-gradient(ellipse at center,color-mix(in srgb,var(--ambient) 36%,transparent) 0%,color-mix(in srgb,var(--flame) 13%,transparent) 36%,transparent 72%); opacity:var(--stage-glow); transform:translate3d(0,0,0); }
+    .flame-stage::after { content:""; position:absolute; z-index:0; pointer-events:none; width:47%; height:12%; left:26.5%; bottom:6%; border:1px solid color-mix(in srgb,var(--ambient) 25%,transparent); border-top-color:color-mix(in srgb,var(--flame-mid) 43%,transparent); border-radius:50%; background:radial-gradient(ellipse,color-mix(in srgb,var(--ambient) 12%,transparent),transparent 72%); opacity:var(--halo-opacity); transform:perspective(180px) rotateX(58deg); }
+    .fire-animation { position:absolute; z-index:1; left:50%; bottom:4%; width:min(88%,330px); height:96%; object-fit:contain; object-position:center bottom; display:block; pointer-events:none; background:transparent; opacity:1; transform:translate3d(-50%,0,0) scale(var(--fire-scale)); transform-origin:50% 100%; transition:transform .58s cubic-bezier(.18,.82,.2,1); backface-visibility:hidden; will-change:transform; }
+    .fire-animation.impact { animation:fire-ignite .92s cubic-bezier(.13,.84,.18,1) both; }
+    .fire-animation.milestone { animation:fire-milestone 1.4s cubic-bezier(.12,.82,.18,1) both; }
+    .fire-animation.epic { animation:fire-epic 1.9s cubic-bezier(.12,.82,.18,1) both; }
+    @keyframes fire-ignite { 0%{transform:translate3d(-50%,0,0) scale(calc(var(--fire-scale)*.78))} 26%{transform:translate3d(-50%,0,0) scale(calc(var(--fire-scale)*1.18))} 49%{transform:translate3d(-50%,0,0) scale(calc(var(--fire-scale)*1.07))} 72%{transform:translate3d(-50%,0,0) scale(calc(var(--fire-scale)*1.015))} 100%{transform:translate3d(-50%,0,0) scale(var(--fire-scale))} }
+    @keyframes fire-milestone { 0%{transform:translate3d(-50%,0,0) scale(calc(var(--fire-scale)*.7)) rotate(-2deg);filter:none} 24%{transform:translate3d(-50%,0,0) scale(calc(var(--fire-scale)*1.25)) rotate(1deg);filter:none} 48%{transform:translate3d(-50%,0,0) scale(calc(var(--fire-scale)*1.08)) rotate(-.5deg)} 72%{transform:translate3d(-50%,0,0) scale(calc(var(--fire-scale)*.98))} 100%{transform:translate3d(-50%,0,0) scale(var(--fire-scale));filter:none} }
+    @keyframes fire-epic { 0%{transform:translate3d(-50%,0,0) scale(calc(var(--fire-scale)*.6)) rotate(-3deg);filter:none} 18%{transform:translate3d(-50%,0,0) scale(calc(var(--fire-scale)*1.34)) rotate(1.8deg);filter:none} 37%{transform:translate3d(-50%,0,0) scale(calc(var(--fire-scale)*1.18)) rotate(-1deg)} 61%{transform:translate3d(-50%,0,0) scale(calc(var(--fire-scale)*1.05)) rotate(.4deg)} 82%{transform:translate3d(-50%,0,0) scale(calc(var(--fire-scale)*.99))} 100%{transform:translate3d(-50%,0,0) scale(var(--fire-scale));filter:none} }
+
+    .counter { display:flex; flex-direction:column; align-items:center; margin-top:-5px; position:relative; z-index:2; }
+    .count { font-size:clamp(76px,19vw,96px); line-height:.94; font-weight:850; letter-spacing:-.07em; font-variant-numeric:tabular-nums; color:var(--flame); text-shadow:0 0 28px color-mix(in srgb,var(--ambient) 8%,transparent); transition:color .9s,text-shadow .9s; }
+    .count-label { color:var(--flame-mid); font-weight:850; font-size:15px; letter-spacing:.035em; margin-top:9px; transition:color .9s; }
+    .subtitle { color:var(--muted); font-size:13px; margin-top:12px; min-height:19px; line-height:1.45; }
+    .main-button { position:relative; isolation:isolate; overflow:hidden; width:100%; border:0; min-height:60px; border-radius:19px; color:#121722; background:linear-gradient(108deg,var(--flame-mid),var(--flame-core) 52%,var(--flame-mid)); background-size:200% 100%; font:850 16px/1 system-ui,sans-serif; margin-top:24px; box-shadow:0 8px 32px color-mix(in srgb,var(--ambient) 20%,transparent),inset 0 1px 0 #ffffffa0; cursor:pointer; transition:transform .15s,filter .25s,box-shadow .5s,background-position .7s; }
+    .main-button::before { content:""; position:absolute; z-index:-1; width:10px;height:10px;left:var(--tap-x,50%);top:var(--tap-y,50%);border-radius:50%;background:#fff;opacity:0;transform:translate(-50%,-50%) scale(1); }
+    .main-button::after { content:"";position:absolute;z-index:0;inset:-80% -40%;background:linear-gradient(110deg,transparent 38%,#ffffff9c 48%,#ffffff14 54%,transparent 63%);transform:translateX(-80%) rotate(8deg);opacity:0;pointer-events:none; }
+    .button-label { position:relative; z-index:2; }
+    .button-star { position:absolute; right:20px; top:50%; color:#fff; opacity:0; font-size:23px; line-height:1; transform:translateY(-50%) rotate(-35deg) scale(.3); text-shadow:0 0 9px #fff,0 0 24px var(--flame); z-index:2; }
+    .main-button:active { transform:scale(.975); }
+    .main-button.ignite { animation:button-ignite .9s cubic-bezier(.12,.86,.18,1) both; box-shadow:0 0 0 1px color-mix(in srgb,var(--flame) 54%,transparent),0 0 28px color-mix(in srgb,var(--flame) 34%,transparent),0 0 56px color-mix(in srgb,var(--ambient) 33%,transparent),inset 0 1px 0 #fff; background-position:100% 50%; }
+    .main-button.ignite::before { z-index:0; background:radial-gradient(circle,#fff 0%,color-mix(in srgb,var(--flame-core) 78%,transparent) 18%,color-mix(in srgb,var(--flame) 48%,transparent) 42%,transparent 72%); animation:button-ripple .78s ease-out both; }
+    .main-button.ignite::after { opacity:1; animation:button-sweep .82s ease-out both; }
+    .main-button.ignite .button-star { animation:button-star-rise .9s cubic-bezier(.12,.8,.2,1) both; }
+    .main-button.ignite.milestone { animation:button-milestone 1.2s cubic-bezier(.12,.86,.18,1) both; }
+    .main-button.ignite.epic { box-shadow:0 0 0 1px #ffffffa3,0 0 32px color-mix(in srgb,var(--flame) 63%,transparent),0 0 76px color-mix(in srgb,var(--ambient) 48%,transparent),inset 0 1px 0 #fff; }
+    .main-button.done { filter:saturate(.68); opacity:.88; cursor:default; box-shadow:0 5px 18px color-mix(in srgb,var(--ambient) 13%,transparent); }
+    .main-button:disabled { cursor:default; }
+    .main-button.done:active { transform:none; }
+    @keyframes button-ignite { 0%{transform:scale(1)} 18%{transform:scale(.965)} 38%{transform:scale(1.04);filter:brightness(1.07)} 60%{transform:scale(.99)} 78%{transform:scale(1.014)} 100%{transform:scale(1);filter:none} }
+    @keyframes button-milestone { 0%{transform:scale(1)} 20%{transform:scale(.95)} 40%{transform:scale(1.06);filter:brightness(1.22)} 62%{transform:scale(.985)} 82%{transform:scale(1.02)} 100%{transform:scale(1)} }
+    @keyframes button-ripple { 0%{opacity:.75;transform:translate(-50%,-50%) scale(.1)} 100%{opacity:0;transform:translate(-50%,-50%) scale(35)} }
+    @keyframes button-sweep { 0%{transform:translateX(-80%) rotate(8deg);opacity:0} 17%{opacity:1} 100%{transform:translateX(82%) rotate(8deg);opacity:0} }
+    @keyframes button-star-rise { 0%{opacity:0;transform:translateY(7px) rotate(-35deg) scale(.3)} 35%{opacity:1;transform:translateY(-50%) rotate(15deg) scale(1.25)} 100%{opacity:0;transform:translateY(-90%) rotate(75deg) scale(.3)} }
+    .count.pop { animation:count-pop .58s cubic-bezier(.16,.9,.2,1.15) both; }
+    @keyframes count-pop { 0%{transform:translateY(7px) scale(.78);filter:none} 42%{transform:translateY(-4px) scale(1.13);filter:brightness(1.42)} 100%{transform:translateY(0) scale(1);filter:none} }
+
+    .section { margin-top:29px; }
+    .section-head { display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:13px; }
+    .section-title { color:#e5e2ee;font-size:13px;font-weight:850;letter-spacing:.09em; }
+    .section-note { color:var(--muted);font-size:11px; }
+    .week { display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:7px; }
+    .day { display:flex;flex-direction:column;align-items:center;gap:8px;min-width:0; }
+    .day-name { font-size:11px;color:var(--muted);font-weight:750; }
+    .day-dot { width:35px;height:35px;max-width:100%;border-radius:12px;background:rgba(25,25,35,.91);border:1px solid var(--line);display:grid;place-items:center;color:#686579;font-size:14px;font-weight:800; }
+    .day-dot.completed { color:#111521;background:var(--flame-mid);border-color:transparent;box-shadow:0 2px 13px color-mix(in srgb,var(--ambient) 23%,transparent); }
+    .day-dot.today { outline:1.5px solid var(--flame);outline-offset:1px;color:var(--text); }
+    .day-dot.today.completed { color:#111521; }
+    .month-toggle { width:100%;border:1px solid var(--line);border-radius:16px;background:rgba(25,25,35,.79);color:#e5e2ee;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 16px;font:850 13px/1 system-ui,sans-serif;letter-spacing:.09em;cursor:pointer; }
+    .month-toggle-side { display:flex;align-items:center;gap:10px;color:var(--muted);font-size:11px;font-weight:650;letter-spacing:0; }
+    .chevron { width:18px;height:18px;transition:transform .22s ease; }
+    .month-toggle[aria-expanded="true"] .chevron { transform:rotate(180deg); }
+    .month-panel { margin-top:10px;animation:panel-in .22s ease-out; }
+    .month-panel[hidden] { display:none; }
+    @keyframes panel-in { from{opacity:0;transform:translateY(-5px)} to{opacity:1;transform:translateY(0)} }
+    .month-card { padding:15px 14px 16px;background:linear-gradient(145deg,#191923,#15151d);border:1px solid #292a37;border-radius:18px; }
+    .month-grid { display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px 5px; }
+    .month-weekday { color:#7d7a8c;text-align:center;font-size:10px;font-weight:850;padding-bottom:4px; }
+    .date-cell { aspect-ratio:1;min-width:0;display:grid;place-items:center;position:relative;font-size:11px;font-weight:700;color:#aaa7b6;border-radius:9px;background:#23232d; }
+    .date-cell.empty { background:transparent; }
+    .date-cell.complete { color:#111521;background:var(--flame-mid); }
+    .date-cell.today { outline:1px solid var(--flame);outline-offset:1px; }
+    .legend { display:flex;justify-content:center;gap:14px;color:var(--muted);font-size:10px;margin-top:12px; }
+    .legend span { display:flex;align-items:center;gap:5px; }
+    .legend i { display:inline-block;width:7px;height:7px;border-radius:3px;background:var(--flame-mid); }
+    .legend .empty-key { background:#302f3a; }
+
+    /* A single pre-rendered transparent effect layer: no live particle simulation on the phone. */
+    .prebuilt-impact { position:fixed; inset:0; z-index:8; pointer-events:none; overflow:hidden; opacity:0; visibility:hidden; contain:strict; background:transparent; }
+    .prebuilt-impact.active { visibility:visible; animation:impact-fade 1.02s cubic-bezier(.16,.74,.22,1) both; }
+    .prebuilt-impact.milestone.active { animation:impact-fade-milestone 1.46s cubic-bezier(.12,.72,.2,1) both; }
+    .prebuilt-impact.major.active { animation:impact-fade-major 1.80s cubic-bezier(.12,.72,.2,1) both; }
+    .prebuilt-impact img { display:block; width:100%;height:100%;object-fit:fill;opacity:1;mix-blend-mode:normal; transform:translateZ(0); backface-visibility:hidden; }
+    @keyframes impact-fade { 0%{opacity:0} 8%{opacity:.98} 38%{opacity:.88} 100%{opacity:0} }
+    @keyframes impact-fade-milestone { 0%{opacity:0} 8%{opacity:1} 26%{opacity:1} 62%{opacity:.70} 100%{opacity:0} }
+    @keyframes impact-fade-major { 0%{opacity:0} 5%{opacity:1} 18%{opacity:.96} 44%{opacity:.88} 72%{opacity:.62} 100%{opacity:0} }
+    .motion-paused .screen-ambience::after { animation-play-state:paused !important; }
+    .motion-paused .main-button::after { animation-play-state:paused !important; }
+    .fire-animation.asset-missing { visibility:hidden; }
+    .extinguished[hidden] { display:none !important; }
+    .extinguished { position:fixed;inset:0;z-index:20;display:grid;place-items:center;padding:24px;background:#020205;min-height:100dvh; }
+    .reignite-button { width:min(100%,320px);min-height:60px;border:1px solid #373440;border-radius:18px;background:linear-gradient(140deg,#17151d,#0c0b10);color:#f2edf8;font:850 16px/1 system-ui,sans-serif;box-shadow:0 0 0 1px #ffffff05,inset 0 1px 0 #ffffff10;cursor:pointer;transition:transform .22s,border-color .5s,box-shadow .5s; }
+    .reignite-button:active { transform:scale(.97);border-color:#8f879b;box-shadow:0 0 32px #b3a6d020; }
+    body.is-extinguished { background:#020205 !important; }
+    body.is-extinguished .screen-ambience,body.is-extinguished .app { display:none !important; }
+    @media (max-height:800px) { .flame-stage{height:clamp(190px,33vh,245px)} .hero{padding-top:0} .section{margin-top:23px} }
+    @media (prefers-reduced-motion:reduce) { .screen-ambience::before,.screen-ambience::after { animation-duration:15s; } .fire-animation { transition-duration:1s; } .main-button::after { display:none; } }
+  </style>
+</head>
+<body>
+  <div class="screen-ambience" id="screenAmbience" aria-hidden="true"></div>
+  <div class="prebuilt-impact" id="prebuiltImpact" aria-hidden="true"><img id="impactAnimation" alt="" decoding="async"></div>
+  <!-- Locally stored, pre-mastered sound cues. No sound is synthesized on the phone. -->
+  <audio id="audioIgnite" preload="auto" src="./sfx-ignite.wav"></audio>
+  <audio id="audioDaily1" preload="auto" src="./sfx-daily-1.wav"></audio>
+  <audio id="audioDaily2" preload="auto" src="./sfx-daily-2.wav"></audio>
+  <audio id="audioDaily3" preload="auto" src="./sfx-daily-3.wav"></audio>
+  <audio id="audioDaily4" preload="auto" src="./sfx-daily-4.wav"></audio>
+  <audio id="audioColor1" preload="auto" src="./sfx-color-1.wav"></audio>
+  <audio id="audioColor2" preload="auto" src="./sfx-color-2.wav"></audio>
+  <audio id="audioColor3" preload="auto" src="./sfx-color-3.wav"></audio>
+  <audio id="audioLegendary1" preload="auto" src="./sfx-legendary-1.wav"></audio>
+  <audio id="audioLegendary2" preload="auto" src="./sfx-legendary-2.wav"></audio>
+  <audio id="audioLegendary3" preload="auto" src="./sfx-legendary-3.wav"></audio>
+
+  <main class="app" id="app">
+    <header>
+      <div class="brand">ALEV SERİSİ</div>
+      <button class="sound-toggle" id="soundToggle" type="button" aria-pressed="true" aria-label="Ses efektlerini kapat" title="Ses efektlerini kapat">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M16 9a4 4 0 0 1 0 6M18.5 6.5a7.5 7.5 0 0 1 0 11" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+      </button>
+    </header>
+    <section class="hero" aria-label="Günlük seri">
+      <div class="flame-stage" id="flameStage" data-theme="blue" aria-hidden="true">
+        <img id="fireAnimation" class="fire-animation" data-theme="blue" data-file="flame-blue.webp" src="./flame-blue.webp" alt="" decoding="async" fetchpriority="high">
+      </div>
+      <div class="counter">
+        <div class="count" id="count">0</div>
+        <div class="count-label" id="countLabel">GÜNLÜK SERİ</div>
+      </div>
+      <div class="subtitle" id="subtitle" aria-live="polite">İlk kıvılcımını yak.</div>
+      <button class="main-button" id="continueButton" type="button"><span class="button-label">Serimi devam ettir</span><span class="button-star" aria-hidden="true">✦</span></button>
+    </section>
+
+    <section class="section" aria-labelledby="weekTitle">
+      <div class="section-head"><div class="section-title" id="weekTitle">BU HAFTA</div><div class="section-note" id="weekNote">0/7 gün</div></div>
+      <div class="week" id="week"></div>
+    </section>
+    <section class="section" aria-labelledby="monthTitle">
+      <button class="month-toggle" id="monthToggle" type="button" aria-expanded="false" aria-controls="monthPanel">
+        <span id="monthTitle">AYLIK SERİ</span>
+        <span class="month-toggle-side"><span id="monthLabel"></span><svg class="chevron" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m6 9 6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+      </button>
+      <div class="month-panel" id="monthPanel" hidden><div class="month-card"><div class="month-grid" id="monthGrid"></div><div class="legend"><span><i></i> Seriye devam edildi</span><span><i class="empty-key"></i> Henüz değil</span></div></div></div>
+    </section>
+  </main>
+  <section class="extinguished" id="extinguishedScreen" hidden aria-label="Alev söndü">
+    <button class="reignite-button" id="reigniteButton" type="button">Alevi yeniden yak</button>
+  </section>
+
+<script>
+(() => {
+  'use strict';
+  const VERSION = 'v19-effects';
+  const STORAGE_KEY = 'alev-serisi-ultimate-v18';
+  const SOUND_KEY = 'alev-serisi-sound-ultimate-v19';
+  const JOURNEY_END = 245;
+  // Completing these days changes the flame colour and resets its growth for the new phase.
+  const milestones = [5,15,30,50,75,105,140,180,225];
+  const MAJOR_MILESTONES = [50,105,180,225,245];
+  const stages = [
+    {name:'Mavi Kıvılcım',color:'#258fff',mid:'#9beaff',core:'#f5fdff',ambient:'#168dff',theme:'blue'},
+    {name:'Hafif Turuncu',color:'#ff9d35',mid:'#ffd07d',core:'#fff9e9',ambient:'#e68a3a',theme:'orange'},
+    {name:'Kızıl Kor',color:'#ff4562',mid:'#ff9ba8',core:'#fff0f2',ambient:'#db2846',theme:'red'},
+    {name:'Beyaz Alev',color:'#e7f5ff',mid:'#fff',core:'#fff',ambient:'#91c8ff',theme:'white'},
+    {name:'Mor Nebula',color:'#aa75ff',mid:'#dfc6ff',core:'#fff9ff',ambient:'#7037d5',theme:'purple'},
+    {name:'Zümrüt Ateşi',color:'#20c995',mid:'#94ffe0',core:'#f0fff9',ambient:'#087d67',theme:'emerald'},
+    {name:'Altın Güneş',color:'#ffbd34',mid:'#ffe891',core:'#fffdf0',ambient:'#b97913',theme:'gold'},
+    {name:'Pembe Nebula',color:'#ff65c5',mid:'#ffb7e6',core:'#fff8fd',ambient:'#b82a83',theme:'pink'},
+    {name:'Turkuaz Dalga',color:'#27d5d1',mid:'#a0fff3',core:'#f4ffff',ambient:'#087e94',theme:'turquoise'},
+    {name:'Yeşil Aurora',color:'#a5df43',mid:'#e4ff9c',core:'#ffffef',ambient:'#527e25',theme:'lime'}
+  ];
+  const $ = id => document.getElementById(id);
+  const root = document.documentElement;
+  let data = loadData();
+  let soundEnabled = readSoundPreference();
+  let assetsPaused = false;
+  let gestureTimer = 0, burstTimer = 0, celebrationTimer = 0;
+  let activeEffect = '';
+  const decodedAudio = new Set();
+  const warmImages = new Map();
+  const assetBase = new URL('./', document.baseURI);
+  const assetUrl = file => new URL(file, assetBase).href;
+
+  function dateKey(d){ return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
+  function todayKey(){ return dateKey(new Date()); }
+  function fromKey(key){ const [y,m,d]=key.split('-').map(Number); return new Date(y,m-1,d,12,0,0,0); }
+  function dayDifference(a,b){ return Math.round((fromKey(b)-fromKey(a))/86400000); }
+  function loadData(){
+    try {
+      const saved=JSON.parse(localStorage.getItem(STORAGE_KEY)||'{}');
+      return {count:Number.isFinite(saved.count)?Math.max(0,Math.min(1000000,Math.floor(saved.count))):0,
+        lastDate:typeof saved.lastDate==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(saved.lastDate)?saved.lastDate:null,
+        completed:Array.isArray(saved.completed)?[...new Set(saved.completed.filter(x=>typeof x==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(x)))].slice(-500):[]};
+    } catch { return {count:0,lastDate:null,completed:[]}; }
+  }
+  function saveData(){ try { localStorage.setItem(STORAGE_KEY,JSON.stringify(data)); return true; } catch { $('subtitle').textContent='Tarayıcı kaydı kapalı olabilir; verilerini korumak için site verilerini silme.'; return false; } }
+  function readSoundPreference(){ try { return localStorage.getItem(SOUND_KEY)!=='off'; } catch { return true; } }
+  function saveSoundPreference(){ try { localStorage.setItem(SOUND_KEY,soundEnabled?'on':'off'); } catch {} }
+  function diffFromLast(){ return data.lastDate?dayDifference(data.lastDate,todayKey()):null; }
+  function missedDay(){ const diff=diffFromLast(); return !!data.lastDate&&data.count>0&&diff>1; }
+  function visibleCount(){ return data.lastDate ? data.count : 0; }
+  function getStage(count){
+    const safe=Math.max(0,Math.min(JOURNEY_END,count)); let index=0;
+    while(index<milestones.length&&safe>=milestones[index]) index++;
+    const start=index===0?0:milestones[index-1];
+    const end=index<milestones.length?milestones[index]:JOURNEY_END;
+    const progress=Math.max(0,Math.min(1,(safe-start)/Math.max(1,end-start)));
+    const daysToChange=index<milestones.length?Math.max(0,milestones[index]-safe):Math.max(0,JOURNEY_END-safe);
+    return {index,progress,daysToChange,start,end};
+  }
+  function setImage(img,file){
+    if(!img) return;
+    const url=assetUrl(file);
+    if(img.dataset.asset===file && img.getAttribute('src')===url) return;
+    img.dataset.asset=file; img.onerror=()=>{img.classList.add('asset-missing');console.warn('[Alev Serisi] Görsel bulunamadı:',file);};
+    img.onload=()=>img.classList.remove('asset-missing'); img.src=url;
+  }
+  function setAudio(audio,file){
+    if(!audio) return;
+    audio.preload='auto'; audio.src=assetUrl(file); audio.load();
+    audio.addEventListener('canplaythrough',()=>decodedAudio.add(file),{once:true});
+    audio.addEventListener('error',()=>console.warn('[Alev Serisi] Ses dosyası bulunamadı:',file),{once:true});
+  }
+  function setSoundIcon(){
+    const btn=$('soundToggle');btn.setAttribute('aria-pressed',String(soundEnabled));
+    btn.setAttribute('aria-label',soundEnabled?'Ses efektlerini kapat':'Ses efektlerini aç');btn.title=soundEnabled?'Ses efektlerini kapat':'Ses efektlerini aç';
+    btn.innerHTML=soundEnabled
+      ? '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M16 9a4 4 0 0 1 0 6M18.5 6.5a7.5 7.5 0 0 1 0 11" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>'
+      : '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="m17 9 5 6m0-6-5 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>';
+  }
+  function playSound(kind,count=visibleCount()){
+    if(!soundEnabled) return;
+    const groups={
+      daily:['audioDaily1','audioDaily2','audioDaily3','audioDaily4'],
+      milestone:['audioColor1','audioColor2','audioColor3'],
+      epic:['audioLegendary1','audioLegendary2','audioLegendary3']
+    };
+    let id='audioIgnite';
+    if(groups[kind]){
+      const group=groups[kind];
+      let index=0;
+      if(kind==='daily') index=(Math.max(1,Math.floor(Number(count)||1)-1))%group.length;
+      else if(kind==='milestone') index=(Math.abs(Math.floor(Number(count)||0))+getStage(count).index)%group.length;
+      else index=Math.floor(Math.max(0,Number(count)||0)/50)%group.length;
+      id=group[index];
+    }
+    const audio=$(id); if(!audio) return;
+    try {
+      // Rewind an already-running cue; native WAV playback avoids any runtime synthesis cost.
+      audio.pause(); audio.currentTime=0; audio.volume=1;
+      const p=audio.play();
+      if(p&&p.catch)p.catch(err=>console.info('[Alev Serisi] Tarayıcı ses oynatmayı engelledi; ses düğmesine dokunup yeniden deneyebilirsin.',err));
+    } catch(err) { console.info('[Alev Serisi] Ses oynatılamadı.',err); }
+  }
+  function prewarm(file){
+    if(warmImages.has(file)) return;
+    // Download into browser cache without animating a hidden <img> or forcing a runtime particle render.
+    const promise=fetch(assetUrl(file),{cache:'force-cache'}).then(r=>{if(!r.ok)throw new Error(String(r.status));return true;}).catch(()=>false);
+    warmImages.set(file,promise);
+  }
+  function preloadTheme(theme,alsoNext=false){
+    const files=t=>[
+      `flame-${t}.webp`,`flame-${t}-poster.webp`,
+      `burst-${t}-a.webp`,`burst-${t}-b.webp`,
+      `milestone-${t}.webp`,`legendary-${t}.webp`
+    ];
+    for(const name of files(theme)) prewarm(name);
+    if(alsoNext){const i=stages.findIndex(s=>s.theme===theme);if(i>=0&&i<stages.length-1)for(const name of files(stages[i+1].theme))prewarm(name);}
+  }
+  function setTheme(count){
+    const state=getStage(count),stage=stages[state.index];
+    // The count was previously computed but never written to the visible counter. Keep display and saved state in sync.
+    $('count').textContent=String(count);
+    root.style.setProperty('--flame',stage.color);root.style.setProperty('--flame-mid',stage.mid);root.style.setProperty('--flame-core',stage.core);root.style.setProperty('--ambient',stage.ambient);
+    // Growth is phase-local: it grows each day within a colour, resets on colour milestones.
+    const scale=count===0?.38:.47+.47*Math.pow(state.progress,.78);
+    root.style.setProperty('--fire-scale',scale.toFixed(4));
+    const strength=Math.min(.86,.30+state.index*.035+state.progress*.26);
+    root.style.setProperty('--ambient-opacity',strength.toFixed(3));
+    root.style.setProperty('--stage-glow',(0.24+state.progress*.55+state.index*.025).toFixed(3));
+    root.style.setProperty('--halo-opacity',(0.13+state.progress*.23+state.index*.012).toFixed(3));
+    const stageEl=$('flameStage');stageEl.dataset.theme=stage.theme;
+    stageEl.dataset.level=count<15?'spark':count<75?'ember':count<140?'blaze':count<225?'inferno':'legend';
+    const fire=$('fireAnimation');fire.dataset.theme=stage.theme;
+    if(!assetsPaused) setImage(fire,`flame-${stage.theme}.webp`);
+    const done=data.lastDate===todayKey(); const button=$('continueButton');
+    button.classList.toggle('done',done);button.disabled=done;
+    button.innerHTML=done?'<span class="button-label">Bugün tamamlandı ✓</span>':'<span class="button-label">Serimi devam ettir</span><span class="button-star" aria-hidden="true">✦</span>';
+    let msg;
+    if(count===0) msg='İlk kıvılcımını yak.';
+    else if(done&&count>=JOURNEY_END) msg='Bugünkü serin tamam. Alevin efsanevi hâlinde. ✨';
+    else if(count>=JOURNEY_END) msg=done?'Bugünkü serin tamam. Yarın yeniden gel. 🔥':'Son alev aşamasındasın. Serin devam ediyor! 🔥';
+    else if(done&&state.daysToChange===1) msg='Bugünkü serin tamam. Yarın renk değişimi var. ✨';
+    else if(done) msg=`Bugünkü serin tamam. ${state.daysToChange} gün sonra yeni renk. 🔥`;
+    else if(state.index<stages.length-1) msg=`${stage.name} · ${state.daysToChange} gün sonra renk değişimi`;
+    else msg=`${stage.name} · ${state.daysToChange} gün sonra son boyut`;
+    $('subtitle').textContent=msg;
+    preloadTheme(stage.theme,state.daysToChange<=2);
+  }
+  function renderWeek(){
+    const c=$('week');c.replaceChildren();const today=new Date();today.setHours(12,0,0,0);const monday=new Date(today);monday.setDate(today.getDate()-((today.getDay()+6)%7));const names=['Pzt','Sal','Çar','Per','Cum','Cmt','Paz'];
+    let total=0;
+    for(let i=0;i<7;i++){const d=new Date(monday);d.setDate(monday.getDate()+i);const k=dateKey(d),done=data.completed.includes(k),isToday=k===todayKey();if(done)total++;
+      const item=document.createElement('div');item.className='day';const name=document.createElement('div');name.className='day-name';name.textContent=names[i];const dot=document.createElement('div');dot.className='day-dot'+(done?' completed':'')+(isToday?' today':'');dot.textContent=done?'✓':String(d.getDate());item.append(name,dot);c.append(item);}
+    $('weekNote').textContent=`${total}/7 gün`;
+  }
+  function renderMonth(){
+    const now=new Date(),year=now.getFullYear(),month=now.getMonth();$('monthLabel').textContent=new Intl.DateTimeFormat('tr-TR',{month:'long',year:'numeric'}).format(now);
+    const grid=$('monthGrid');grid.replaceChildren();['P','S','Ç','P','C','C','P'].forEach(label=>{const e=document.createElement('div');e.className='month-weekday';e.textContent=label;grid.append(e);});
+    const first=new Date(year,month,1,12),offset=(first.getDay()+6)%7,total=new Date(year,month+1,0).getDate();for(let i=0;i<offset;i++){const e=document.createElement('div');e.className='date-cell empty';grid.append(e);}
+    for(let day=1;day<=total;day++){const d=new Date(year,month,day,12),k=dateKey(d),e=document.createElement('div');e.className='date-cell'+(data.completed.includes(k)?' complete':'')+(k===todayKey()?' today':'');e.textContent=String(day);grid.append(e);}
+  }
+  function clearCelebration(){
+    if(burstTimer)clearTimeout(burstTimer);if(celebrationTimer)clearTimeout(celebrationTimer);burstTimer=celebrationTimer=0;
+    const layer=$('prebuiltImpact'),img=$('impactAnimation');layer.classList.remove('active','major','milestone');img.onload=null;img.onerror=null;img.removeAttribute('src');img.dataset.asset='';activeEffect='';
+    document.body.classList.remove('igniting','major-celebration');
+  }
+  function showCelebration(isMilestone,isMajor,count){
+    clearCelebration();const state=getStage(count),theme=stages[state.index].theme;const kind=isMajor?'legendary':isMilestone?'milestone':'burst';const variant=(Math.abs(Number(count)||0)%2===0)?'a':'b';const file=kind==='burst'?`burst-${theme}-${variant}.webp`:`${kind}-${theme}.webp`;
+    const img=$('impactAnimation'),layer=$('prebuiltImpact'),fire=$('fireAnimation');activeEffect=file;
+    // Only one animated WebP decoder runs at a time on entry-level phones: keep the current flame poster behind the pre-rendered celebration.
+    if(!assetsPaused)setImage(fire,`flame-${theme}-poster.webp`);
+    img.dataset.asset='';img.onload=()=>{
+      if(activeEffect!==file||assetsPaused||document.hidden)return;
+      layer.classList.add('active');if(isMilestone)layer.classList.add('milestone');if(isMajor)layer.classList.add('major');
+      document.body.classList.add('igniting');if(isMajor)document.body.classList.add('major-celebration');
+      const duration=kind==='burst'?1020:(kind==='milestone'?1460:1800);
+      celebrationTimer=setTimeout(()=>{document.body.classList.remove('igniting','major-celebration');celebrationTimer=0;},duration);
+      burstTimer=setTimeout(()=>{layer.classList.remove('active','major','milestone');img.onload=null;img.onerror=null;img.removeAttribute('src');img.dataset.asset='';activeEffect='';burstTimer=0;if(!assetsPaused&&!document.hidden)setImage(fire,`flame-${theme}.webp`);},duration+80);
+    };
+    img.onerror=()=>{layer.classList.remove('active','major','milestone');img.onload=null;img.onerror=null;img.removeAttribute('src');console.warn('[Alev Serisi] Efekt yüklenemedi:',file);if(!assetsPaused&&!document.hidden)setImage(fire,`flame-${theme}.webp`);};
+    img.src=assetUrl(file);
+  }
+  function animateTap(event,isMilestone,isMajor){
+    const button=$('continueButton'),rect=button.getBoundingClientRect();
+    if(event&&Number.isFinite(event.clientX)&&rect.width){button.style.setProperty('--tap-x',`${Math.max(0,Math.min(100,(event.clientX-rect.left)/rect.width*100))}%`);button.style.setProperty('--tap-y',`${Math.max(0,Math.min(100,(event.clientY-rect.top)/rect.height*100))}%`);}else{button.style.setProperty('--tap-x','50%');button.style.setProperty('--tap-y','50%');}
+    button.classList.remove('ignite','milestone','epic');void button.offsetWidth;button.classList.add('ignite');if(isMilestone)button.classList.add('milestone');if(isMajor)button.classList.add('epic');
+    const count=$('count');count.classList.remove('pop');void count.offsetWidth;count.classList.add('pop');
+    const fire=$('fireAnimation');fire.classList.remove('impact','milestone','epic');void fire.offsetWidth;fire.classList.add(isMajor?'epic':isMilestone?'milestone':'impact');
+    setTimeout(()=>{button.classList.remove('ignite','milestone','epic');fire.classList.remove('impact','milestone','epic');count.classList.remove('pop');},isMajor?2100:isMilestone?1500:1000);
+  }
+  function addCompletedDate(k){if(!data.completed.includes(k))data.completed.push(k);data.completed=data.completed.filter(x=>dayDifference(x,k)<=500).sort();}
+  function render(){
+    const expired=missedDay();$('app').hidden=expired;$('extinguishedScreen').hidden=!expired;document.body.classList.toggle('is-extinguished',expired);
+    if(expired){clearCelebration();return;}
+    setTheme(visibleCount());renderWeek();renderMonth();
+  }
+  function freshStart(){
+    const k=todayKey();data.count=1;data.lastDate=k;addCompletedDate(k);saveData();render();animateTap(null,false,false);showCelebration(false,false,1);playSound('ignite');
+  }
+  function freezeVisuals(){
+    if(assetsPaused)return;assetsPaused=true;document.body.classList.add('motion-paused');
+    const fire=$('fireAnimation'),theme=fire.dataset.theme||'blue';setImage(fire,`flame-${theme}-poster.webp`);
+    // Don't decode a full-screen animated WebP during pinch-zoom or scroll.
+    clearCelebration();
+  }
+  function resumeVisuals(){
+    if(!assetsPaused)return;assetsPaused=false;document.body.classList.remove('motion-paused');
+    if(!document.body.classList.contains('is-extinguished')){const theme=$('flameStage').dataset.theme||'blue';setImage($('fireAnimation'),`flame-${theme}.webp`);}
+  }
+  function pauseForViewportGesture(){
+    freezeVisuals();if(gestureTimer)clearTimeout(gestureTimer);
+    gestureTimer=setTimeout(()=>{gestureTimer=0;if(!document.hidden)resumeVisuals();},380);
+  }
+  // Daily progression is deliberately limited to one press per calendar day.
+  $('continueButton').addEventListener('click',event=>{
+    const today=todayKey();
+    if(missedDay()){render();return;}
+    if(data.lastDate===today)return;
+    const previous=data.lastDate?data.count:0;
+    const gap=data.lastDate?dayDifference(data.lastDate,today):null;
+    data.count=(gap===1)?Math.min(1000000,Math.max(1,data.count+1)):1;
+    data.lastDate=today;addCompletedDate(today);saveData();
+    const next=data.count,oldStage=getStage(previous).index,nextStage=getStage(next).index;
+    const milestone=nextStage!==oldStage||milestones.includes(next)||next===JOURNEY_END;
+    const major=MAJOR_MILESTONES.includes(next);
+    render();animateTap(event,milestone,major);showCelebration(milestone,major,next);playSound(major?'epic':milestone?'milestone':'daily',next);
+  });
+  $('reigniteButton').addEventListener('click',freshStart);
+  $('soundToggle').addEventListener('click',()=>{soundEnabled=!soundEnabled;saveSoundPreference();setSoundIcon();if(soundEnabled)playSound('ignite');});
+  $('monthToggle').addEventListener('click',()=>{const btn=$('monthToggle'),open=btn.getAttribute('aria-expanded')==='true';btn.setAttribute('aria-expanded',String(!open));$('monthPanel').hidden=open;});
+  for(const [id,file] of [['audioIgnite','sfx-ignite.wav'],['audioDaily1','sfx-daily-1.wav'],['audioDaily2','sfx-daily-2.wav'],['audioDaily3','sfx-daily-3.wav'],['audioDaily4','sfx-daily-4.wav'],['audioColor1','sfx-color-1.wav'],['audioColor2','sfx-color-2.wav'],['audioColor3','sfx-color-3.wav'],['audioLegendary1','sfx-legendary-1.wav'],['audioLegendary2','sfx-legendary-2.wav'],['audioLegendary3','sfx-legendary-3.wav']])setAudio($(id),file);
+  setSoundIcon();
+  setImage($('fireAnimation'),'flame-blue.webp');
+  render();
+  // Pause animated WebP assets during pinch zoom/viewport movement; resume when the gesture settles.
+  document.addEventListener('visibilitychange',()=>{
+    if(document.hidden){if(gestureTimer)clearTimeout(gestureTimer);gestureTimer=0;freezeVisuals();}
+    else{render();if(gestureTimer)clearTimeout(gestureTimer);gestureTimer=setTimeout(()=>{gestureTimer=0;resumeVisuals();},180);}
+  });
+  const vv=window.visualViewport;
+  if(vv){vv.addEventListener('resize',pauseForViewportGesture,{passive:true});vv.addEventListener('scroll',pauseForViewportGesture,{passive:true});}
+  window.addEventListener('resize',pauseForViewportGesture,{passive:true});
+  window.addEventListener('scroll',pauseForViewportGesture,{passive:true});
+  document.addEventListener('touchmove',pauseForViewportGesture,{passive:true});
+  window.addEventListener('pageshow',()=>{render();if(document.hidden)freezeVisuals();});
+  window.addEventListener('focus',render);
+  if('serviceWorker' in navigator && /^https?:$/.test(location.protocol))window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js',{updateViaCache:'none'}).catch(e=>console.warn('Service worker kaydedilemedi',e)));
+})();
+</script>
+</body>
+</html>
